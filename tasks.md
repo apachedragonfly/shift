@@ -3,9 +3,9 @@
 🔧 INIT & PROJECT SETUP
 
 1. Create Next.js App with App Router
-Start: Run npx create-next-app@latest shift-organizer --app
+Start: Run npx create-next-app@latest shift --app
 End: Project builds and runs with npm run dev
-IMPORTANT: Just create app in the SHIFT main root folder, so not make a subfolder when starting this project.
+
 2. Set up Tailwind CSS
 Start: Install Tailwind via official guide
 End: A test class (text-red-500) shows correctly in app/page.tsx
