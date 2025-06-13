@@ -185,7 +185,10 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
 
   const handleProceedWithDuplicates = () => {
     setShowDuplicateWarning(false)
-    handleSubmit(new Event('submit') as any, true)
+    const syntheticEvent = {
+      preventDefault: () => {},
+    } as React.FormEvent
+    handleSubmit(syntheticEvent, true)
   }
 
   const handleCancelDuplicates = () => {
@@ -237,8 +240,8 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
             </div>
           </div>
           
-          <div className="border border-gray-300 rounded-lg p-4">
-            <div className="flex justify-center">
+          <div className="border border-gray-300 rounded-lg p-2 sm:p-4">
+            <div className="flex justify-center overflow-x-auto">
               {selectionMode === 'multiple' ? (
                 <Calendar
                   mode="multiple"
@@ -247,7 +250,7 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
                   disabled={(date) => date < new Date()}
                   modifiers={calendarModifiers}
                   modifiersStyles={calendarModifiersStyles}
-                  className="rounded-md"
+                  className="rounded-md min-w-fit"
                 />
               ) : (
                 <Calendar
@@ -257,7 +260,7 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
                   disabled={(date) => date < new Date()}
                   modifiers={calendarModifiers}
                   modifiersStyles={calendarModifiersStyles}
-                  className="rounded-md"
+                  className="rounded-md min-w-fit"
                 />
               )}
             </div>
@@ -372,11 +375,11 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   Shift Type
                 </label>
-                <div className="flex bg-gray-100 rounded-lg p-1 w-fit">
+                <div className="flex flex-col sm:flex-row bg-gray-100 rounded-lg p-1 w-full sm:w-fit">
                   <button
                     type="button"
                     onClick={() => handleTypeChange('day')}
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors mb-1 sm:mb-0 ${
                       type === 'day'
                         ? 'bg-white text-yellow-700 shadow-sm border border-yellow-200'
                         : 'text-gray-600 hover:text-gray-900'
@@ -387,7 +390,7 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
                   <button
                     type="button"
                     onClick={() => handleTypeChange('8hour')}
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors mb-1 sm:mb-0 ${
                       type === '8hour'
                         ? 'bg-white text-green-700 shadow-sm border border-green-200'
                         : 'text-gray-600 hover:text-gray-900'
@@ -468,7 +471,7 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
                     pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
                     maxLength={5}
                     required
-                    className="w-full px-3 py-3 text-lg font-mono text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center"
+                    className="w-full px-3 py-3 text-base sm:text-lg font-mono text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center touch-manipulation"
                   />
                 </div>
 
@@ -488,7 +491,7 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
                     pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
                     maxLength={5}
                     required
-                    className="w-full px-3 py-3 text-lg font-mono text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center"
+                    className="w-full px-3 py-3 text-base sm:text-lg font-mono text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center touch-manipulation"
                   />
                 </div>
               </div>
@@ -527,8 +530,8 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
 
         {/* Duplicate Warning Modal */}
         {showDuplicateWarning && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-md">
               <div className="flex items-center mb-4">
                 <div className="flex-shrink-0">
                   <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -564,16 +567,16 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
                 </p>
               </div>
               
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleProceedWithDuplicates}
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex-1 bg-blue-600 text-white py-3 px-4 text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 touch-manipulation"
                 >
                   Skip Duplicates & Continue
                 </button>
                 <button
                   onClick={handleCancelDuplicates}
-                  className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 text-sm font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 text-sm font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 touch-manipulation"
                 >
                   Cancel
                 </button>
@@ -586,7 +589,7 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
           <button
             type="submit"
             disabled={loading || getAllSelectedDates().length === 0}
-            className="w-full bg-blue-600 text-white py-4 px-6 text-lg font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+            className="w-full bg-blue-600 text-white py-3 sm:py-4 px-4 sm:px-6 text-base sm:text-lg font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg touch-manipulation"
           >
             {loading 
               ? 'Adding Shifts...' 

@@ -27,7 +27,7 @@ export default function Login() {
       } else if (data.user) {
         router.push('/dashboard')
       }
-    } catch (error) {
+    } catch {
       setMessage('An unexpected error occurred')
     } finally {
       setLoading(false)
@@ -97,7 +97,7 @@ export default function Login() {
 
             <div className="text-center">
               <span className="text-sm text-gray-600">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <button
                   type="button"
                   onClick={() => router.push('/auth/signup')}

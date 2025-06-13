@@ -2,14 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createEvents } from 'ics'
 
-// Create Supabase client for server-side use
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+interface Shift {
+  id: string
+  date: string
+  type: 'day' | 'night' | '8hour'
+  start_time: string
+  end_time: string
+  user_id: string
+  created_at: string
+  is_overtime?: boolean
+}
 
 // Helper function to convert shift data to ICS event format
-function convertShiftToEvent(shift: any) {
+function convertShiftToEvent(shift: Shift) {
   const { date, type, start_time, end_time, id } = shift
   
   // Parse date and times
@@ -45,7 +50,7 @@ function convertShiftToEvent(shift: any) {
       endDateTime.getHours(),
       endDateTime.getMinutes()
     ] as [number, number, number, number, number],
-    title: `${type === 'day' ? 'Day' : 'Night'} Shift`,
+    title: `${type === 'day' ? 'Day' : type === '8hour' ? '8-Hour' : 'Night'} Shift`,
     description: `Generated from SHIFT Organizer`,
     location: 'Work',
     uid: `shift-${id}@shift-organizer.com`,

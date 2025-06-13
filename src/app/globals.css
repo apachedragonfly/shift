@@ -2,7 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
+/* iOS Safari optimizations */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific styles */
+  .touch-manipulation {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  /* Prevent zoom on input focus */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Improve button touch targets */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
 
+/* Calendar component mobile optimizations */
+.rdp {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: #3b82f6;
+  --rdp-background-color: #f8fafc;
+}
+
+@media (max-width: 640px) {
+  .rdp {
+    --rdp-cell-size: 36px;
+  }
+  
+  .rdp-months {
+    flex-direction: column;
+  }
+  
+  .rdp-month {
+    margin: 0;
+  }
+  
+  .rdp-table {
+    max-width: 100%;
+  }
+}
+
+/* Improve touch targets for mobile */
+@media (max-width: 768px) {
+  .rdp-day_button {
+    height: 36px;
+    width: 36px;
+    font-size: 14px;
+  }
+  
+  .rdp-nav_button {
+    height: 36px;
+    width: 36px;
+  }
+}
+
+/* Smooth scrolling for better UX */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent horizontal scroll on mobile */
+body {
+  overflow-x: hidden;
+}
+
+/* Better focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Improve modal backdrop on mobile */
+@media (max-width: 640px) {
+  .fixed.inset-0 {
+    padding: 16px;
+  }
+}
 
 @layer base {
   :root {

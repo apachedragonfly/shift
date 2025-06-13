@@ -253,9 +253,9 @@ export default function Dashboard() {
             )}
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
               {/* Shift Form */}
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 order-1">
                 <ShiftForm 
                   onSubmit={handleShiftSubmit} 
                   loading={submitting} 
@@ -265,7 +265,7 @@ export default function Dashboard() {
               </div>
 
               {/* Calendar Export */}
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-1 order-2">
                 <CalendarExportButton />
               </div>
             </div>
@@ -275,7 +275,7 @@ export default function Dashboard() {
               <div className="p-6 border-b border-gray-200">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <h2 className="text-xl font-semibold text-gray-900">Your Shifts</h2>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
                     <label htmlFor="month-filter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
                       Filter by month:
                     </label>
@@ -283,7 +283,7 @@ export default function Dashboard() {
                       id="month-filter"
                       value={selectedMonth}
                       onChange={(e) => setSelectedMonth(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-[160px]"
+                      className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-[160px] touch-manipulation"
                     >
                       {generateMonthOptions().map(option => (
                         <option key={option.value} value={option.value}>
@@ -378,7 +378,7 @@ export default function Dashboard() {
                     <button
                       onClick={() => handleDeleteShift(shift.id)}
                       disabled={deletingShiftId === shift.id}
-                      className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors w-full sm:w-auto"
+                      className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors w-full sm:w-auto touch-manipulation"
                     >
                       {deletingShiftId === shift.id ? (
                         <div className="flex items-center justify-center gap-2">

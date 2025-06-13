@@ -24,10 +24,10 @@ export default function SignUp() {
 
       if (error) {
         setMessage(error.message)
-      } else if (data.user) {
+      } else if (data?.user) {
         setMessage('Sign up successful! Check your email to confirm your account.')
       }
-    } catch (error) {
+    } catch {
       setMessage('An unexpected error occurred')
     } finally {
       setLoading(false)
