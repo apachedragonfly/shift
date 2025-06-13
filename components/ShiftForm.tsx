@@ -65,14 +65,34 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
     }
   }
 
+  const validateTimeFormat = (time: string): boolean => {
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
+    return timeRegex.test(time)
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
     const allSelectedDates = getAllSelectedDates()
     
-    // Basic validation
-    if (allSelectedDates.length === 0 || !startTime || !endTime) {
-      alert('Please select at least one date and fill in all time fields')
+    // Enhanced validation
+    if (allSelectedDates.length === 0) {
+      alert('Please select at least one date using the calendar above')
+      return
+    }
+    
+    if (!startTime || !endTime) {
+      alert('Please fill in both start and end times')
+      return
+    }
+    
+    if (!validateTimeFormat(startTime)) {
+      alert('Please enter start time in HH:MM format (e.g., 07:30)')
+      return
+    }
+    
+    if (!validateTimeFormat(endTime)) {
+      alert('Please enter end time in HH:MM format (e.g., 19:30)')
       return
     }
     
@@ -231,63 +251,128 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
           )}
         </div>
 
-        <div>
-          <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-2">
-            Shift Type
-          </label>
-          <select
-            id="type"
-            value={type}
-            onChange={(e) => {
-              console.log('Select change event triggered:', e.target.value)
-              handleTypeChange(e.target.value as 'day' | 'night')
-            }}
-            className="w-full px-3 py-3 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-          >
-            <option value="day">☀️ Day Shift (07:30 - 19:30)</option>
-            <option value="night">🌙 Night Shift (19:30 - 07:30)</option>
-          </select>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-2">
-              Start Time
-            </label>
-            <input
-              type="text"
-              id="startTime"
-              value={startTime}
-              onChange={(e) => {
-                console.log('Start time changed to:', e.target.value)
-                setStartTime(e.target.value)
-              }}
-              placeholder="HH:MM (e.g., 07:30)"
-              pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
-              maxLength={5}
-              required
-              className="w-full px-3 py-3 text-lg font-mono text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center"
-            />
+        {/* Bulk Shift Form Section */}
+        <div className="border-t border-gray-200 pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium text-gray-900">Shift Configuration</h3>
+            {getAllSelectedDates().length > 0 && validateTimeFormat(startTime) && validateTimeFormat(endTime) && (
+              <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                ✓ Ready to create {getAllSelectedDates().length} shift{getAllSelectedDates().length !== 1 ? 's' : ''}
+              </span>
+            )}
           </div>
+          
+          <div className="space-y-4">
+            {getAllSelectedDates().length === 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p className="text-sm text-amber-800">
+                  📅 Please select dates from the calendar above to configure your shifts
+                </p>
+              </div>
+            )}
+            
+            {/* Shift Type Toggle */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Shift Type
+              </label>
+              <div className="flex bg-gray-100 rounded-lg p-1 w-fit">
+                <button
+                  type="button"
+                  onClick={() => handleTypeChange('day')}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    type === 'day'
+                      ? 'bg-white text-yellow-700 shadow-sm border border-yellow-200'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  ☀️ Day Shift
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTypeChange('night')}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    type === 'night'
+                      ? 'bg-white text-blue-700 shadow-sm border border-blue-200'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  🌙 Night Shift
+                </button>
+              </div>
+            </div>
 
-          <div>
-            <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-2">
-              End Time
-            </label>
-            <input
-              type="text"
-              id="endTime"
-              value={endTime}
-              onChange={(e) => {
-                console.log('End time changed to:', e.target.value)
-                setEndTime(e.target.value)
-              }}
-              placeholder="HH:MM (e.g., 19:30)"
-              pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
-              maxLength={5}
-              required
-              className="w-full px-3 py-3 text-lg font-mono text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center"
-            />
+            {/* Time Configuration */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">
+                Time Configuration
+                <span className="text-xs text-gray-500 ml-2">
+                  (Pre-filled based on shift type, customizable)
+                </span>
+              </h4>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="startTime" className="block text-sm font-medium text-gray-600 mb-2">
+                    Start Time
+                  </label>
+                  <input
+                    type="text"
+                    id="startTime"
+                    value={startTime}
+                    onChange={(e) => {
+                      console.log('Start time changed to:', e.target.value)
+                      setStartTime(e.target.value)
+                    }}
+                    placeholder="HH:MM (e.g., 07:30)"
+                    pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+                    maxLength={5}
+                    required
+                    className="w-full px-3 py-3 text-lg font-mono text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="endTime" className="block text-sm font-medium text-gray-600 mb-2">
+                    End Time
+                  </label>
+                  <input
+                    type="text"
+                    id="endTime"
+                    value={endTime}
+                    onChange={(e) => {
+                      console.log('End time changed to:', e.target.value)
+                      setEndTime(e.target.value)
+                    }}
+                    placeholder="HH:MM (e.g., 19:30)"
+                    pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+                    maxLength={5}
+                    required
+                    className="w-full px-3 py-3 text-lg font-mono text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center"
+                  />
+                </div>
+              </div>
+
+              {/* Time Preview */}
+              <div className="mt-3 p-3 bg-white rounded border border-gray-200">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Shift Duration:</span>
+                  <span className="font-mono text-gray-900">
+                    {startTime} → {endTime}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
+                  <span>Applied to {getAllSelectedDates().length} selected date{getAllSelectedDates().length !== 1 ? 's' : ''}</span>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    type === 'day' 
+                      ? 'bg-yellow-100 text-yellow-700' 
+                      : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {type === 'day' ? '☀️ Day' : '🌙 Night'}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
