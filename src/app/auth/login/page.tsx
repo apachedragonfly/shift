@@ -38,6 +38,13 @@ export default function Login() {
     setMessage('')
 
     try {
+      // Check if Supabase is properly configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        setMessage('Application not configured. Please set up Supabase environment variables.')
+        setLoading(false)
+        return
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -48,8 +55,14 @@ export default function Login() {
       } else if (data.user) {
         router.push('/dashboard')
       }
-    } catch {
-      setMessage('An unexpected error occurred')
+    } catch (error) {
+      console.error('Login error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      if (errorMessage.includes('Missing Supabase environment variables')) {
+        setMessage('Application configuration error. Please check environment variables.')
+      } else {
+        setMessage('An unexpected error occurred: ' + errorMessage)
+      }
     } finally {
       setLoading(false)
     }

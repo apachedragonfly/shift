@@ -35,6 +35,13 @@ export default function SignUp() {
     setMessage('')
 
     try {
+      // Check if Supabase is properly configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        setMessage('Application not configured. Please set up Supabase environment variables.')
+        setLoading(false)
+        return
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -45,8 +52,14 @@ export default function SignUp() {
       } else if (data?.user) {
         setMessage('Sign up successful! Check your email to confirm your account.')
       }
-    } catch {
-      setMessage('An unexpected error occurred')
+    } catch (error) {
+      console.error('Signup error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      if (errorMessage.includes('Missing Supabase environment variables')) {
+        setMessage('Application configuration error. Please check environment variables.')
+      } else {
+        setMessage('An unexpected error occurred: ' + errorMessage)
+      }
     } finally {
       setLoading(false)
     }
