@@ -13,11 +13,12 @@ interface ShiftFormProps {
     is_overtime?: boolean
   }) => void
   loading?: boolean
+  onSubmitSuccess?: () => void
 }
 
 type SelectionMode = 'multiple' | 'range'
 
-export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps) {
+export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess }: ShiftFormProps) {
   const [selectedDates, setSelectedDates] = useState<Date[]>([])
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('multiple')
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
@@ -25,6 +26,17 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
   const [startTime, setStartTime] = useState('07:30')
   const [endTime, setEndTime] = useState('19:30')
   const [isOvertime, setIsOvertime] = useState(false)
+
+  // Reset all form state to initial values
+  const resetForm = () => {
+    setSelectedDates([])
+    setDateRange(undefined)
+    setType('day')
+    setStartTime('07:30')
+    setEndTime('19:30')
+    setIsOvertime(false)
+    setSelectionMode('multiple')
+  }
 
   // Helper function to generate array of dates from range
   const generateDateRange = (from: Date, to: Date): Date[] => {
@@ -109,11 +121,11 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
           is_overtime: isOvertime,
         })
       })
-      // Clear selected dates after successful submission
-      if (selectionMode === 'multiple') {
-        setSelectedDates([])
-      } else {
-        setDateRange(undefined)
+      // Reset form after successful submission
+      resetForm()
+      // Call optional success callback
+      if (onSubmitSuccess) {
+        onSubmitSuccess()
       }
     }
   }
@@ -421,20 +433,33 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading || getAllSelectedDates().length === 0}
-          className="w-full bg-blue-600 text-white py-4 px-6 text-lg font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-        >
-          {loading 
-            ? 'Adding Shifts...' 
-            : getAllSelectedDates().length === 0 
-              ? 'Select dates to create shifts'
-              : getAllSelectedDates().length === 1 
-                ? 'Add Shift' 
-                : `Add ${getAllSelectedDates().length} Shifts`
-          }
-        </button>
+        <div className="space-y-3">
+          <button
+            type="submit"
+            disabled={loading || getAllSelectedDates().length === 0}
+            className="w-full bg-blue-600 text-white py-4 px-6 text-lg font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+          >
+            {loading 
+              ? 'Adding Shifts...' 
+              : getAllSelectedDates().length === 0 
+                ? 'Select dates to create shifts'
+                : getAllSelectedDates().length === 1 
+                  ? 'Add Shift' 
+                  : `Add ${getAllSelectedDates().length} Shifts`
+            }
+          </button>
+          
+          {(getAllSelectedDates().length > 0 || type !== 'day' || startTime !== '07:30' || endTime !== '19:30' || isOvertime) && (
+            <button
+              type="button"
+              onClick={resetForm}
+              disabled={loading}
+              className="w-full bg-gray-100 text-gray-700 py-2 px-4 text-sm font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              🔄 Reset Form
+            </button>
+          )}
+        </div>
       </form>
     </div>
   )
