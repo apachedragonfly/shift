@@ -7,9 +7,6 @@ import CalendarExportButton from '../../../components/CalendarExportButton'
 import { supabase } from '../../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
-// Force dynamic rendering to avoid prerender issues with Supabase
-export const dynamic = 'force-dynamic'
-
 interface Shift {
   id: string
   date: string
