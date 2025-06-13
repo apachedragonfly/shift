@@ -24,6 +24,11 @@ export default function Dashboard() {
   const [shifts, setShifts] = useState<Shift[]>([])
   const [fetchingShifts, setFetchingShifts] = useState(true)
   const [deletingShiftId, setDeletingShiftId] = useState<string | null>(null)
+  const [selectedMonth, setSelectedMonth] = useState<string>(() => {
+    // Default to current month (YYYY-MM format)
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  })
   const router = useRouter()
 
   // Fetch shifts on component mount
@@ -183,6 +188,36 @@ export default function Dashboard() {
     }
   }
 
+  // Filter shifts by selected month
+  const filteredShifts = shifts.filter(shift => {
+    const shiftMonth = shift.date.substring(0, 7) // Extract YYYY-MM from YYYY-MM-DD
+    return shiftMonth === selectedMonth
+  })
+
+  // Generate month options for the dropdown (last 12 months + next 12 months)
+  const generateMonthOptions = () => {
+    const options = []
+    const now = new Date()
+    
+    // Add past 12 months
+    for (let i = 12; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      const label = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+      options.push({ value, label })
+    }
+    
+    // Add next 12 months
+    for (let i = 1; i <= 12; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth() + i, 1)
+      const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      const label = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+      options.push({ value, label })
+    }
+    
+    return options
+  }
+
   return (
     <AuthGuard>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -238,7 +273,26 @@ export default function Dashboard() {
             {/* Shifts Display Section */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="p-6 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900">Your Shifts</h2>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <h2 className="text-xl font-semibold text-gray-900">Your Shifts</h2>
+                  <div className="flex items-center gap-3">
+                    <label htmlFor="month-filter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                      Filter by month:
+                    </label>
+                    <select
+                      id="month-filter"
+                      value={selectedMonth}
+                      onChange={(e) => setSelectedMonth(e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-[160px]"
+                    >
+                      {generateMonthOptions().map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
               <div className="p-6">
             
@@ -251,9 +305,27 @@ export default function Dashboard() {
               <p className="text-gray-600 text-center py-4">
                 No shifts scheduled yet. Add your first shift above!
               </p>
+            ) : filteredShifts.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-600 mb-2">
+                  No shifts scheduled for {generateMonthOptions().find(opt => opt.value === selectedMonth)?.label}
+                </p>
+                <p className="text-sm text-gray-500">
+                  You have {shifts.length} total shift{shifts.length !== 1 ? 's' : ''} in other months
+                </p>
+              </div>
             ) : (
-                                <div className="space-y-4">
-                {shifts.map((shift) => (
+              <>
+                <div className="mb-4 text-sm text-gray-600">
+                  Showing {filteredShifts.length} shift{filteredShifts.length !== 1 ? 's' : ''} for {generateMonthOptions().find(opt => opt.value === selectedMonth)?.label}
+                  {shifts.length !== filteredShifts.length && (
+                    <span className="ml-2 text-gray-500">
+                      ({shifts.length} total)
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-4">
+                {filteredShifts.map((shift) => (
                   <div
                     key={shift.id}
                     className={`p-4 rounded-lg border-l-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-sm transition-shadow ${
@@ -316,7 +388,8 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-                )}
+              </>
+            )}
               </div>
             </div>
           </div>

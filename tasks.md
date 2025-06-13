@@ -118,4 +118,4 @@ Start: Above or beside calendar, add dropdown or month selector
 End: List below calendar only shows shifts for selected month
 34. Finalize Responsive Layout for Calendar View
 Start: Ensure calendar and controls stack well on mobile
-End: All interactions work smoothly on iOS Safari and smaller screens
+End: All interactions work smoothly on iOS Safari and smaller screen
