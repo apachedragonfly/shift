@@ -18,6 +18,22 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
   const [startTime, setStartTime] = useState('07:00')
   const [endTime, setEndTime] = useState('19:00')
 
+  const handleTypeChange = (newType: 'day' | 'night') => {
+    console.log('Shift type changed to:', newType) // Debug log
+    setType(newType)
+    
+    // Auto-fill times based on shift type
+    if (newType === 'day') {
+      console.log('Setting day shift times: 07:00 - 19:00') // Debug log
+      setStartTime('07:00')
+      setEndTime('19:00')
+    } else if (newType === 'night') {
+      console.log('Setting night shift times: 19:00 - 07:00') // Debug log
+      setStartTime('19:00')
+      setEndTime('07:00')
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -46,19 +62,22 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
             value={date}
             onChange={(e) => setDate(e.target.value)}
             required
-            className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            className="w-full px-4 py-3 text-lg font-semibold text-gray-900 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           />
         </div>
 
         <div>
           <label htmlFor="type" className="block text-base font-semibold text-gray-900 mb-2">
-            Shift Type
+            Shift Type: {type}
           </label>
           <select
             id="type"
             value={type}
-            onChange={(e) => setType(e.target.value as 'day' | 'night')}
-            className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            onChange={(e) => {
+              console.log('Select change event triggered:', e.target.value)
+              handleTypeChange(e.target.value as 'day' | 'night')
+            }}
+            className="w-full px-4 py-3 text-lg font-semibold text-gray-900 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           >
             <option value="day">Day Shift (07:00 - 19:00)</option>
             <option value="night">Night Shift (19:00 - 07:00)</option>
@@ -67,37 +86,43 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
 
         <div>
           <label htmlFor="startTime" className="block text-base font-semibold text-gray-900 mb-2">
-            Start Time (24-hour format)
+            Start Time: {startTime || 'Not set'}
           </label>
           <input
-            type="time"
+            type="text"
             id="startTime"
             value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
+            onChange={(e) => {
+              console.log('Start time changed to:', e.target.value)
+              setStartTime(e.target.value)
+            }}
+            placeholder="HH:MM (e.g., 07:00)"
+            pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+            maxLength={5}
             required
-            step="300"
-            pattern="[0-9]{2}:[0-9]{2}"
-            title="Please enter time in 24-hour format (HH:MM)"
-            className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white font-mono"
-            style={{ colorScheme: 'light' }}
+            className="w-full px-4 py-3 text-2xl font-bold text-gray-900 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white font-mono text-center"
+            style={{ color: '#111827 !important' }}
           />
         </div>
 
         <div>
           <label htmlFor="endTime" className="block text-base font-semibold text-gray-900 mb-2">
-            End Time (24-hour format)
+            End Time: {endTime || 'Not set'}
           </label>
           <input
-            type="time"
+            type="text"
             id="endTime"
             value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
+            onChange={(e) => {
+              console.log('End time changed to:', e.target.value)
+              setEndTime(e.target.value)
+            }}
+            placeholder="HH:MM (e.g., 19:00)"
+            pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+            maxLength={5}
             required
-            step="300"
-            pattern="[0-9]{2}:[0-9]{2}"
-            title="Please enter time in 24-hour format (HH:MM)"
-            className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white font-mono"
-            style={{ colorScheme: 'light' }}
+            className="w-full px-4 py-3 text-2xl font-bold text-gray-900 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white font-mono text-center"
+            style={{ color: '#111827 !important' }}
           />
         </div>
 
