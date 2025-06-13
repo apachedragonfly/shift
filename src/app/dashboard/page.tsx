@@ -1,16 +1,57 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AuthGuard from '../../../components/AuthGuard'
 import ShiftForm from '../../../components/ShiftForm'
 import { supabase } from '../../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
+interface Shift {
+  id: string
+  date: string
+  type: 'day' | 'night'
+  start_time: string
+  end_time: string
+  created_at: string
+}
+
 export default function Dashboard() {
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState('')
+  const [shifts, setShifts] = useState<Shift[]>([])
+  const [fetchingShifts, setFetchingShifts] = useState(true)
   const router = useRouter()
+
+  // Fetch shifts on component mount
+  useEffect(() => {
+    fetchShifts()
+  }, [])
+
+  const fetchShifts = async () => {
+    setFetchingShifts(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('shifts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching shifts:', error)
+      } else {
+        setShifts(data || [])
+      }
+    } catch (error) {
+      console.error('Unexpected error fetching shifts:', error)
+    } finally {
+      setFetchingShifts(false)
+    }
+  }
 
   const handleLogout = async () => {
     setLoading(true)
@@ -61,6 +102,8 @@ export default function Dashboard() {
       } else {
         setMessage('Shift added successfully!')
         console.log('Shift added:', data)
+        // Refresh the shifts list
+        fetchShifts()
       }
     } catch (error) {
       console.error('Unexpected error:', error)
@@ -109,6 +152,56 @@ export default function Dashboard() {
           )}
 
           <ShiftForm onSubmit={handleShiftSubmit} loading={submitting} />
+
+          {/* Shifts Display Section */}
+          <div className="bg-white rounded-lg shadow p-6 mt-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Shifts</h2>
+            
+            {fetchingShifts ? (
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-2 text-gray-600">Loading shifts...</p>
+              </div>
+            ) : shifts.length === 0 ? (
+              <p className="text-gray-600 text-center py-4">
+                No shifts scheduled yet. Add your first shift above!
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {shifts.map((shift) => (
+                  <div
+                    key={shift.id}
+                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-shrink-0">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          shift.type === 'day' 
+                            ? 'bg-yellow-100 text-yellow-800' 
+                            : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {shift.type === 'day' ? '☀️ Day' : '🌙 Night'}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {new Date(shift.date).toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {shift.start_time} - {shift.end_time}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </AuthGuard>
