@@ -7,7 +7,7 @@ import { DateRange } from "react-day-picker"
 interface ShiftFormProps {
   onSubmit?: (shiftData: {
     date: string
-    type: 'day' | 'night'
+    type: 'day' | 'night' | '8hour'
     start_time: string
     end_time: string
     is_overtime?: boolean
@@ -24,7 +24,7 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
   const [selectedDates, setSelectedDates] = useState<Date[]>([])
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('multiple')
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
-  const [type, setType] = useState<'day' | 'night'>('day')
+  const [type, setType] = useState<'day' | 'night' | '8hour'>('day')
   const [startTime, setStartTime] = useState('07:30')
   const [endTime, setEndTime] = useState('19:30')
   const [isOvertime, setIsOvertime] = useState(false)
@@ -69,7 +69,7 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
     return []
   }
 
-  const handleTypeChange = (newType: 'day' | 'night') => {
+  const handleTypeChange = (newType: 'day' | 'night' | '8hour') => {
     console.log('Shift type changed to:', newType) // Debug log
     setType(newType)
     
@@ -82,6 +82,10 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
       console.log('Setting night shift times: 19:30 - 07:30') // Debug log
       setStartTime('19:30')
       setEndTime('07:30')
+    } else if (newType === '8hour') {
+      console.log('Setting 8-hour shift times: 07:30 - 15:30') // Debug log
+      setStartTime('07:30')
+      setEndTime('15:30')
     }
   }
 
@@ -382,6 +386,17 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
                   </button>
                   <button
                     type="button"
+                    onClick={() => handleTypeChange('8hour')}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      type === '8hour'
+                        ? 'bg-white text-green-700 shadow-sm border border-green-200'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    🕐 8-Hour Shift
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => handleTypeChange('night')}
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                       type === 'night'
@@ -492,9 +507,11 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       type === 'day' 
                         ? 'bg-yellow-100 text-yellow-700' 
+                        : type === '8hour'
+                        ? 'bg-green-100 text-green-700'
                         : 'bg-blue-100 text-blue-700'
                     }`}>
-                      {type === 'day' ? '☀️ Day' : '🌙 Night'}
+                      {type === 'day' ? '☀️ Day' : type === '8hour' ? '🕐 8hr' : '🌙 Night'}
                     </span>
                     {isOvertime && (
                       <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">

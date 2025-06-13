@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 interface Shift {
   id: string
   date: string
-  type: 'day' | 'night'
+  type: 'day' | 'night' | '8hour'
   start_time: string
   end_time: string
   created_at: string
@@ -79,7 +79,7 @@ export default function Dashboard() {
 
   const handleShiftSubmit = async (shiftData: {
     date: string
-    type: 'day' | 'night'
+    type: 'day' | 'night' | '8hour'
     start_time: string
     end_time: string
     is_overtime?: boolean
@@ -331,6 +331,8 @@ export default function Dashboard() {
                     className={`p-4 rounded-lg border-l-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-sm transition-shadow ${
                       shift.type === 'day'
                         ? 'border-yellow-400 bg-yellow-50'
+                        : shift.type === '8hour'
+                        ? 'border-green-400 bg-green-50'
                         : 'border-blue-600 bg-blue-50'
                     }`}
                   >
@@ -354,10 +356,12 @@ export default function Dashboard() {
                             className={`inline-flex px-3 py-1 rounded-full text-sm font-medium w-fit ${
                               shift.type === 'day'
                                 ? 'bg-yellow-200 text-yellow-800'
+                                : shift.type === '8hour'
+                                ? 'bg-green-200 text-green-800'
                                 : 'bg-blue-200 text-blue-800'
                             }`}
                           >
-                            {shift.type === 'day' ? '☀️ Day Shift' : '🌙 Night Shift'}
+                            {shift.type === 'day' ? '☀️ Day Shift' : shift.type === '8hour' ? '🕐 8-Hour Shift' : '🌙 Night Shift'}
                           </span>
                           {shift.is_overtime && (
                             <span className="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-orange-200 text-orange-800 w-fit">
