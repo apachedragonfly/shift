@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import AuthGuard from '../../../components/AuthGuard'
 import ShiftForm from '../../../components/ShiftForm'
+import CalendarExportButton from '../../../components/CalendarExportButton'
 import { supabase } from '../../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
@@ -178,6 +179,9 @@ export default function Dashboard() {
           )}
 
           <ShiftForm onSubmit={handleShiftSubmit} loading={submitting} />
+
+          {/* Calendar Export Section */}
+          <CalendarExportButton />
 
           {/* Shifts Display Section */}
           <div className="bg-white rounded-lg shadow p-6 mt-6">
