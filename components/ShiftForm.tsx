@@ -15,8 +15,8 @@ interface ShiftFormProps {
 export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps) {
   const [date, setDate] = useState('')
   const [type, setType] = useState<'day' | 'night'>('day')
-  const [startTime, setStartTime] = useState('07:00')
-  const [endTime, setEndTime] = useState('19:00')
+  const [startTime, setStartTime] = useState('07:30')
+  const [endTime, setEndTime] = useState('19:30')
 
   const handleTypeChange = (newType: 'day' | 'night') => {
     console.log('Shift type changed to:', newType) // Debug log
@@ -24,13 +24,13 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
     
     // Auto-fill times based on shift type
     if (newType === 'day') {
-      console.log('Setting day shift times: 07:00 - 19:00') // Debug log
-      setStartTime('07:00')
-      setEndTime('19:00')
+      console.log('Setting day shift times: 07:30 - 19:30') // Debug log
+      setStartTime('07:30')
+      setEndTime('19:30')
     } else if (newType === 'night') {
-      console.log('Setting night shift times: 19:00 - 07:00') // Debug log
-      setStartTime('19:00')
-      setEndTime('07:00')
+      console.log('Setting night shift times: 19:30 - 07:30') // Debug log
+      setStartTime('19:30')
+      setEndTime('07:30')
     }
   }
 
@@ -79,8 +79,8 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
             }}
             className="w-full px-4 py-3 text-lg font-semibold text-gray-900 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           >
-            <option value="day">Day Shift (07:00 - 19:00)</option>
-            <option value="night">Night Shift (19:00 - 07:00)</option>
+            <option value="day">Day Shift (07:30 - 19:30)</option>
+            <option value="night">Night Shift (19:30 - 07:30)</option>
           </select>
         </div>
 
@@ -96,7 +96,7 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
               console.log('Start time changed to:', e.target.value)
               setStartTime(e.target.value)
             }}
-            placeholder="HH:MM (e.g., 07:00)"
+            placeholder="HH:MM (e.g., 07:30)"
             pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
             maxLength={5}
             required
@@ -117,7 +117,7 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
               console.log('End time changed to:', e.target.value)
               setEndTime(e.target.value)
             }}
-            placeholder="HH:MM (e.g., 19:00)"
+            placeholder="HH:MM (e.g., 19:30)"
             pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
             maxLength={5}
             required
