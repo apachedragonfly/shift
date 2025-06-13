@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createEvents } from 'ics'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 interface Shift {
   id: string
   date: string

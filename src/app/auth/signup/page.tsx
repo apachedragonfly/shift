@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { supabase } from '../../../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
+// Force dynamic rendering to avoid prerender issues with Supabase
+export const dynamic = 'force-dynamic'
+
 export default function SignUp() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
