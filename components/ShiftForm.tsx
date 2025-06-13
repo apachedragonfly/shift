@@ -37,6 +37,12 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Basic validation
+    if (!date || !startTime || !endTime) {
+      alert('Please fill in all fields')
+      return
+    }
+    
     if (onSubmit) {
       onSubmit({
         date,
