@@ -159,6 +159,30 @@ export default function Dashboard() {
     }
   }
 
+  const checkForDuplicateShifts = async (dates: string[]): Promise<string[]> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) return []
+
+      const { data, error } = await supabase
+        .from('shifts')
+        .select('date')
+        .eq('user_id', user.id)
+        .in('date', dates)
+
+      if (error) {
+        console.error('Error checking for duplicate shifts:', error)
+        return []
+      }
+
+      return data?.map(shift => shift.date) || []
+    } catch (error) {
+      console.error('Unexpected error checking duplicates:', error)
+      return []
+    }
+  }
+
   return (
     <AuthGuard>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -197,7 +221,11 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
               {/* Shift Form */}
               <div className="lg:col-span-2">
-                <ShiftForm onSubmit={handleShiftSubmit} loading={submitting} />
+                <ShiftForm 
+                  onSubmit={handleShiftSubmit} 
+                  loading={submitting} 
+                  onCheckDuplicates={checkForDuplicateShifts}
+                />
               </div>
 
               {/* Calendar Export */}

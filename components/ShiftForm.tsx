@@ -14,11 +14,12 @@ interface ShiftFormProps {
   }) => void
   loading?: boolean
   onSubmitSuccess?: () => void
+  onCheckDuplicates?: (dates: string[]) => Promise<string[]> // Returns array of dates with existing shifts
 }
 
 type SelectionMode = 'multiple' | 'range'
 
-export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess }: ShiftFormProps) {
+export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, onCheckDuplicates }: ShiftFormProps) {
   const [selectedDates, setSelectedDates] = useState<Date[]>([])
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('multiple')
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
@@ -26,6 +27,8 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess }
   const [startTime, setStartTime] = useState('07:30')
   const [endTime, setEndTime] = useState('19:30')
   const [isOvertime, setIsOvertime] = useState(false)
+  const [duplicateDates, setDuplicateDates] = useState<string[]>([])
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false)
 
   // Reset all form state to initial values
   const resetForm = () => {
@@ -36,6 +39,8 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess }
     setEndTime('19:30')
     setIsOvertime(false)
     setSelectionMode('multiple')
+    setDuplicateDates([])
+    setShowDuplicateWarning(false)
   }
 
   // Helper function to generate array of dates from range
@@ -84,7 +89,7 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess }
     return timeRegex.test(time)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, forceSave = false) => {
     e.preventDefault()
     
     const allSelectedDates = getAllSelectedDates()
@@ -109,10 +114,26 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess }
       alert('Please enter end time in HH:MM format (e.g., 19:30)')
       return
     }
+
+    // Check for duplicates if function is provided and not forcing save
+    if (onCheckDuplicates && !forceSave) {
+      const dateStrings = allSelectedDates.map(date => date.toISOString().split('T')[0])
+      const duplicates = await onCheckDuplicates(dateStrings)
+      
+      if (duplicates.length > 0) {
+        setDuplicateDates(duplicates)
+        setShowDuplicateWarning(true)
+        return
+      }
+    }
     
     // Submit each date as a separate shift
     if (onSubmit) {
-      allSelectedDates.forEach(date => {
+      const datesToSubmit = forceSave 
+        ? getAllSelectedDates().filter(date => !duplicateDates.includes(date.toISOString().split('T')[0]))
+        : getAllSelectedDates()
+        
+      datesToSubmit.forEach(date => {
         onSubmit({
           date: date.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD string
           type,
@@ -128,6 +149,16 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess }
         onSubmitSuccess()
       }
     }
+  }
+
+  const handleProceedWithDuplicates = () => {
+    setShowDuplicateWarning(false)
+    handleSubmit(new Event('submit') as any, true)
+  }
+
+  const handleCancelDuplicates = () => {
+    setShowDuplicateWarning(false)
+    setDuplicateDates([])
   }
 
   return (
@@ -432,6 +463,63 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess }
             </div>
           </div>
         </div>
+
+        {/* Duplicate Warning Modal */}
+        {showDuplicateWarning && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+              <div className="flex items-center mb-4">
+                <div className="flex-shrink-0">
+                  <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-lg font-medium text-gray-900">Duplicate Shifts Found</h3>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-3">
+                  You already have shifts on the following dates:
+                </p>
+                <div className="bg-amber-50 rounded-lg p-3 mb-4">
+                  <ul className="text-sm text-amber-800 space-y-1">
+                    {duplicateDates.map(date => (
+                      <li key={date} className="flex items-center">
+                        <span className="text-amber-500 mr-2">•</span>
+                        {new Date(date).toLocaleDateString('en-US', { 
+                          weekday: 'short', 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Would you like to skip these dates and create shifts for the remaining dates only?
+                </p>
+              </div>
+              
+              <div className="flex space-x-3">
+                <button
+                  onClick={handleProceedWithDuplicates}
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Skip Duplicates & Continue
+                </button>
+                <button
+                  onClick={handleCancelDuplicates}
+                  className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 text-sm font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-3">
           <button
