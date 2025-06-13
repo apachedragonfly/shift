@@ -69,8 +69,21 @@ export async function GET(request: NextRequest) {
     // Extract the token
     const token = authHeader.substring(7)
 
-    // Set the auth token for this request
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    // Create a new Supabase client with the user's token for this request
+    const supabaseWithAuth = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      }
+    )
+
+    // Verify the user with the authenticated client
+    const { data: { user }, error: authError } = await supabaseWithAuth.auth.getUser()
 
     if (authError || !user) {
       return NextResponse.json(
@@ -79,12 +92,15 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Fetch user's shifts from database
-    const { data: shifts, error: shiftsError } = await supabase
+    // Fetch user's shifts from database using the authenticated client
+    console.log('Fetching shifts for user:', user.id)
+    const { data: shifts, error: shiftsError } = await supabaseWithAuth
       .from('shifts')
       .select('*')
       .eq('user_id', user.id)
       .order('date', { ascending: true })
+
+    console.log('Shifts query result:', { shifts, shiftsError, count: shifts?.length })
 
     if (shiftsError) {
       console.error('Error fetching shifts:', shiftsError)

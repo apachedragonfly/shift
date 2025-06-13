@@ -37,11 +37,15 @@ export default function Dashboard() {
       
       if (!user) return
 
+      console.log('Dashboard: fetching shifts for user ID:', user.id)
+
       const { data, error } = await supabase
         .from('shifts')
         .select('*')
         .eq('user_id', user.id)
         .order('date', { ascending: false })
+
+      console.log('Dashboard: found', data?.length || 0, 'shifts')
 
       if (error) {
         console.error('Error fetching shifts:', error)
@@ -76,9 +80,14 @@ export default function Dashboard() {
     setSubmitting(true)
     setMessage('')
 
+    console.log('=== ADDING SHIFT ===')
+    console.log('Shift data:', shiftData)
+
     try {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser()
+      
+      console.log('Adding shift for user:', user?.id)
       
       if (!user) {
         setMessage('You must be logged in to add shifts')
@@ -98,13 +107,16 @@ export default function Dashboard() {
           }
         ])
 
+      console.log('Insert result:', { data, error })
+
       if (error) {
         console.error('Error inserting shift:', error)
         setMessage('Error adding shift: ' + error.message)
       } else {
         setMessage('Shift added successfully!')
-        console.log('Shift added:', data)
+        console.log('SUCCESS: Shift added to database')
         // Refresh the shifts list
+        console.log('Refreshing shifts list...')
         fetchShifts()
       }
     } catch (error) {

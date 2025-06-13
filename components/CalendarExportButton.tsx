@@ -20,6 +20,8 @@ export default function CalendarExportButton() {
         return
       }
 
+      console.log('Export: attempting for user ID:', session.user.id)
+
       // Call the API endpoint with auth token
       const response = await fetch('/api/generate-ical', {
         method: 'GET',
@@ -29,8 +31,11 @@ export default function CalendarExportButton() {
         },
       })
 
+      console.log('Export: API status', response.status)
+
       if (!response.ok) {
         const errorData = await response.json()
+        console.log('Export: API error -', errorData.error)
         setMessage(errorData.error || 'Failed to generate calendar file')
         return
       }
