@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Calendar } from "@/components/ui/calendar"
 
 interface ShiftFormProps {
   onSubmit?: (shiftData: {
@@ -13,7 +14,7 @@ interface ShiftFormProps {
 }
 
 export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps) {
-  const [date, setDate] = useState('')
+  const [date, setDate] = useState<Date | undefined>(undefined)
   const [type, setType] = useState<'day' | 'night'>('day')
   const [startTime, setStartTime] = useState('07:30')
   const [endTime, setEndTime] = useState('19:30')
@@ -45,7 +46,7 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
     
     if (onSubmit) {
       onSubmit({
-        date,
+        date: date.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD string
         type,
         start_time: startTime,
         end_time: endTime,
@@ -61,17 +62,18 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
       
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         <div>
-          <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-            Date
+          <label className="block text-sm font-medium text-gray-700 mb-4">
+            Select Date
           </label>
-          <input
-            type="date"
-            id="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-            className="w-full px-3 py-3 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-          />
+          <div className="flex justify-center border border-gray-300 rounded-lg p-4">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={setDate}
+              disabled={(date) => date < new Date()}
+              className="rounded-md"
+            />
+          </div>
         </div>
 
         <div>
