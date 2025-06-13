@@ -14,7 +14,7 @@ interface ShiftFormProps {
 }
 
 export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps) {
-  const [date, setDate] = useState<Date | undefined>(undefined)
+  const [selectedDates, setSelectedDates] = useState<Date[]>([])
   const [type, setType] = useState<'day' | 'night'>('day')
   const [startTime, setStartTime] = useState('07:30')
   const [endTime, setEndTime] = useState('19:30')
@@ -39,18 +39,23 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
     e.preventDefault()
     
     // Basic validation
-    if (!date || !startTime || !endTime) {
-      alert('Please fill in all fields')
+    if (selectedDates.length === 0 || !startTime || !endTime) {
+      alert('Please select at least one date and fill in all time fields')
       return
     }
     
+    // Submit each date as a separate shift
     if (onSubmit) {
-      onSubmit({
-        date: date.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD string
-        type,
-        start_time: startTime,
-        end_time: endTime,
+      selectedDates.forEach(date => {
+        onSubmit({
+          date: date.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD string
+          type,
+          start_time: startTime,
+          end_time: endTime,
+        })
       })
+      // Clear selected dates after successful submission
+      setSelectedDates([])
     }
   }
 
@@ -63,17 +68,52 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-4">
-            Select Date
+            Select Dates ({selectedDates.length} selected)
           </label>
           <div className="flex justify-center border border-gray-300 rounded-lg p-4">
             <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
+              mode="multiple"
+              selected={selectedDates}
+              onSelect={(dates) => setSelectedDates(dates || [])}
               disabled={(date) => date < new Date()}
               className="rounded-md"
             />
           </div>
+          {selectedDates.length > 0 && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-sm font-medium text-blue-900">Selected dates:</p>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDates([])}
+                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                >
+                  Clear all
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedDates.map((date, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
+                  >
+                    {date.toLocaleDateString('en-US', {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDates(selectedDates.filter((_, i) => i !== index))}
+                      className="ml-1 text-blue-600 hover:text-blue-800"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div>
@@ -138,10 +178,17 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || selectedDates.length === 0}
           className="w-full bg-blue-600 text-white py-4 px-6 text-lg font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
         >
-          {loading ? 'Adding Shift...' : 'Add Shift'}
+          {loading 
+            ? 'Adding Shifts...' 
+            : selectedDates.length === 0 
+              ? 'Select dates to create shifts'
+              : selectedDates.length === 1 
+                ? 'Add Shift' 
+                : `Add ${selectedDates.length} Shifts`
+          }
         </button>
       </form>
     </div>
