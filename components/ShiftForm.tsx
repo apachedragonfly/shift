@@ -15,11 +15,12 @@ interface ShiftFormProps {
   loading?: boolean
   onSubmitSuccess?: () => void
   onCheckDuplicates?: (dates: string[]) => Promise<string[]> // Returns array of dates with existing shifts
+  existingShiftDates?: string[] // Array of dates that already have shifts (for highlighting)
 }
 
 type SelectionMode = 'multiple' | 'range'
 
-export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, onCheckDuplicates }: ShiftFormProps) {
+export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, onCheckDuplicates, existingShiftDates = [] }: ShiftFormProps) {
   const [selectedDates, setSelectedDates] = useState<Date[]>([])
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('multiple')
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
@@ -97,6 +98,25 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
     return `${year}-${month}-${day}`
   }
 
+  // Check if a date has an existing shift
+  const hasExistingShift = (date: Date): boolean => {
+    const dateString = formatDateForDatabase(date)
+    return existingShiftDates.includes(dateString)
+  }
+
+  // Create modifiers for calendar styling
+  const calendarModifiers = {
+    hasShift: (date: Date) => hasExistingShift(date)
+  }
+
+  const calendarModifiersStyles = {
+    hasShift: {
+      backgroundColor: '#dbeafe',
+      border: '2px solid #3b82f6',
+      fontWeight: 'bold' as const,
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent, forceSave = false) => {
     e.preventDefault()
     
@@ -171,9 +191,9 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-fit">
-      <div className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900">Add New Shift</h2>
-      </div>
+        <div className="p-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900">Add New Shift</h2>
+        </div>
       
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         <div>
@@ -213,23 +233,39 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
             </div>
           </div>
           
-          <div className="flex justify-center border border-gray-300 rounded-lg p-4">
-            {selectionMode === 'multiple' ? (
-              <Calendar
-                mode="multiple"
-                selected={selectedDates}
-                onSelect={(dates) => setSelectedDates(dates || [])}
-                disabled={(date) => date < new Date()}
-                className="rounded-md"
-              />
-            ) : (
-              <Calendar
-                mode="range"
-                selected={dateRange}
-                onSelect={(range) => setDateRange(range)}
-                disabled={(date) => date < new Date()}
-                className="rounded-md"
-              />
+          <div className="border border-gray-300 rounded-lg p-4">
+            <div className="flex justify-center">
+              {selectionMode === 'multiple' ? (
+                <Calendar
+                  mode="multiple"
+                  selected={selectedDates}
+                  onSelect={(dates) => setSelectedDates(dates || [])}
+                  disabled={(date) => date < new Date()}
+                  modifiers={calendarModifiers}
+                  modifiersStyles={calendarModifiersStyles}
+                  className="rounded-md"
+                />
+              ) : (
+                <Calendar
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={(range) => setDateRange(range)}
+                  disabled={(date) => date < new Date()}
+                  modifiers={calendarModifiers}
+                  modifiersStyles={calendarModifiersStyles}
+                  className="rounded-md"
+                />
+              )}
+            </div>
+            {existingShiftDates.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="flex items-center justify-center gap-2 text-xs text-gray-600">
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-blue-100 border-2 border-blue-500 rounded"></div>
+                    <span>Dates with existing shifts</span>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
           {getAllSelectedDates().length > 0 && (

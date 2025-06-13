@@ -225,6 +225,7 @@ export default function Dashboard() {
                   onSubmit={handleShiftSubmit} 
                   loading={submitting} 
                   onCheckDuplicates={checkForDuplicateShifts}
+                  existingShiftDates={shifts.map(shift => shift.date)}
                 />
               </div>
 
