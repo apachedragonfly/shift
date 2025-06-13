@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [message, setMessage] = useState('')
   const [shifts, setShifts] = useState<Shift[]>([])
   const [fetchingShifts, setFetchingShifts] = useState(true)
+  const [deletingShiftId, setDeletingShiftId] = useState<string | null>(null)
   const router = useRouter()
 
   // Fetch shifts on component mount
@@ -113,6 +114,31 @@ export default function Dashboard() {
     }
   }
 
+  const handleDeleteShift = async (shiftId: string) => {
+    setDeletingShiftId(shiftId)
+    
+    try {
+      const { error } = await supabase
+        .from('shifts')
+        .delete()
+        .eq('id', shiftId)
+
+      if (error) {
+        console.error('Error deleting shift:', error)
+        setMessage('Error deleting shift: ' + error.message)
+      } else {
+        // Remove shift from local state immediately
+        setShifts(shifts.filter(shift => shift.id !== shiftId))
+        setMessage('Shift deleted successfully!')
+      }
+    } catch (error) {
+      console.error('Unexpected error deleting shift:', error)
+      setMessage('An unexpected error occurred while deleting shift')
+    } finally {
+      setDeletingShiftId(null)
+    }
+  }
+
   return (
     <AuthGuard>
       <div className="min-h-screen bg-gray-50 p-8">
@@ -197,6 +223,14 @@ export default function Dashboard() {
                         </p>
                       </div>
                     </div>
+                    
+                    <button
+                      onClick={() => handleDeleteShift(shift.id)}
+                      disabled={deletingShiftId === shift.id}
+                      className="flex-shrink-0 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {deletingShiftId === shift.id ? 'Deleting...' : 'Delete'}
+                    </button>
                   </div>
                 ))}
               </div>
