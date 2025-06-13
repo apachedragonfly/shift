@@ -8,6 +8,8 @@ import { useRouter } from 'next/navigation'
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [message, setMessage] = useState('')
   const router = useRouter()
 
   const handleLogout = async () => {
@@ -19,6 +21,52 @@ export default function Dashboard() {
       console.error('Error logging out:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleShiftSubmit = async (shiftData: {
+    date: string
+    type: 'day' | 'night'
+    start_time: string
+    end_time: string
+  }) => {
+    setSubmitting(true)
+    setMessage('')
+
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        setMessage('You must be logged in to add shifts')
+        return
+      }
+
+      // Insert shift into database
+      const { data, error } = await supabase
+        .from('shifts')
+        .insert([
+          {
+            user_id: user.id,
+            date: shiftData.date,
+            type: shiftData.type,
+            start_time: shiftData.start_time,
+            end_time: shiftData.end_time,
+          }
+        ])
+
+      if (error) {
+        console.error('Error inserting shift:', error)
+        setMessage('Error adding shift: ' + error.message)
+      } else {
+        setMessage('Shift added successfully!')
+        console.log('Shift added:', data)
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error)
+      setMessage('An unexpected error occurred')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -50,9 +98,17 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <ShiftForm onSubmit={(shiftData) => {
-            console.log('Shift data:', shiftData)
-          }} />
+          {message && (
+            <div className={`mb-4 p-4 rounded-md ${
+              message.includes('successfully') 
+                ? 'bg-green-50 text-green-800 border border-green-200' 
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}>
+              {message}
+            </div>
+          )}
+
+          <ShiftForm onSubmit={handleShiftSubmit} loading={submitting} />
         </div>
       </div>
     </AuthGuard>
