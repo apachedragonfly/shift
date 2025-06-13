@@ -158,50 +158,57 @@ export default function Dashboard() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Dashboard
-            </h1>
-            <button
-              onClick={handleLogout}
-              disabled={loading}
-              className="px-8 py-4 text-xl font-bold text-white rounded-xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl transform transition-all duration-200"
-              style={{ 
-                backgroundColor: '#dc2626', 
-                borderColor: '#dc2626',
-                minWidth: '120px',
-                minHeight: '60px'
-              }}
-            >
-              {loading ? 'Logging out...' : 'LOGOUT'}
-            </button>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <p className="text-gray-600">
-              Welcome to SHIFT! You have successfully logged in.
-            </p>
-          </div>
-
-          {message && (
-            <div className={`mb-4 p-4 rounded-md ${
-              message.includes('successfully') 
-                ? 'bg-green-50 text-green-800 border border-green-200' 
-                : 'bg-red-50 text-red-800 border border-red-200'
-            }`}>
-              {message}
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div className="max-w-6xl mx-auto">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+                  SHIFT
+                </h1>
+                <p className="text-gray-600 text-sm sm:text-base">
+                  Manage your work schedule
+                </p>
+              </div>
+              <button
+                onClick={handleLogout}
+                disabled={loading}
+                className="w-full sm:w-auto px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transform transition-all duration-200 hover:shadow-md"
+              >
+                {loading ? 'Logging out...' : 'Logout'}
+              </button>
             </div>
-          )}
 
-          <ShiftForm onSubmit={handleShiftSubmit} loading={submitting} />
+            {message && (
+              <div className={`mb-6 p-4 rounded-lg ${
+                message.includes('successfully') 
+                  ? 'bg-green-50 text-green-800 border border-green-200' 
+                  : 'bg-red-50 text-red-800 border border-red-200'
+              }`}>
+                {message}
+              </div>
+            )}
 
-          {/* Calendar Export Section */}
-          <CalendarExportButton />
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              {/* Shift Form */}
+              <div className="lg:col-span-2">
+                <ShiftForm onSubmit={handleShiftSubmit} loading={submitting} />
+              </div>
 
-          {/* Shifts Display Section */}
-          <div className="bg-white rounded-lg shadow p-6 mt-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Shifts</h2>
+              {/* Calendar Export */}
+              <div className="lg:col-span-1">
+                <CalendarExportButton />
+              </div>
+            </div>
+
+            {/* Shifts Display Section */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="p-6 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">Your Shifts</h2>
+              </div>
+              <div className="p-6">
             
             {fetchingShifts ? (
               <div className="text-center py-4">
@@ -213,50 +220,51 @@ export default function Dashboard() {
                 No shifts scheduled yet. Add your first shift above!
               </p>
             ) : (
-              <div className="space-y-3">
+                                <div className="space-y-4">
                 {shifts.map((shift) => (
                   <div
                     key={shift.id}
-                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                    className={`p-4 rounded-lg border-l-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-sm transition-shadow ${
+                      shift.type === 'day'
+                        ? 'border-yellow-400 bg-yellow-50'
+                        : 'border-blue-600 bg-blue-50'
+                    }`}
                   >
-                    <div className="flex items-center space-x-4">
-                      <div className="flex-shrink-0">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          shift.type === 'day' 
-                            ? 'bg-yellow-100 text-yellow-800' 
-                            : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {shift.type === 'day' ? '☀️ Day' : '🌙 Night'}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                        <span className="font-semibold text-gray-900 text-lg">
                           {new Date(shift.date).toLocaleDateString('en-US', {
-                            weekday: 'short',
+                            weekday: 'long',
                             year: 'numeric',
-                            month: 'short',
+                            month: 'long',
                             day: 'numeric'
                           })}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {shift.start_time} - {shift.end_time}
-                        </p>
+                        </span>
+                        <span
+                          className={`inline-flex px-3 py-1 rounded-full text-sm font-medium w-fit ${
+                            shift.type === 'day'
+                              ? 'bg-yellow-200 text-yellow-800'
+                              : 'bg-blue-200 text-blue-800'
+                          }`}
+                        >
+                          {shift.type === 'day' ? '☀️ Day Shift' : '🌙 Night Shift'}
+                        </span>
+                      </div>
+                      <div className="text-gray-700 font-mono text-lg">
+                        {shift.start_time} → {shift.end_time}
                       </div>
                     </div>
                     
                     <button
                       onClick={() => handleDeleteShift(shift.id)}
                       disabled={deletingShiftId === shift.id}
-                      className="flex-shrink-0 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                      className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors w-full sm:w-auto"
                     >
                       {deletingShiftId === shift.id ? (
-                        <span className="flex items-center">
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Deleting...
-                        </span>
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                          <span>Deleting...</span>
+                        </div>
                       ) : (
                         'Delete'
                       )}
@@ -264,7 +272,9 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-            )}
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

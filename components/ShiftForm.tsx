@@ -54,12 +54,14 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Add New Shift</h2>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-fit">
+      <div className="p-6 border-b border-gray-200">
+        <h2 className="text-xl font-semibold text-gray-900">Add New Shift</h2>
+      </div>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="p-6 space-y-6">
         <div>
-          <label htmlFor="date" className="block text-base font-semibold text-gray-900 mb-2">
+          <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
             Date
           </label>
           <input
@@ -68,13 +70,13 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
             value={date}
             onChange={(e) => setDate(e.target.value)}
             required
-            className="w-full px-4 py-3 text-lg font-semibold text-gray-900 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            className="w-full px-3 py-3 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           />
         </div>
 
         <div>
-          <label htmlFor="type" className="block text-base font-semibold text-gray-900 mb-2">
-            Shift Type: {type}
+          <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-2">
+            Shift Type
           </label>
           <select
             id="type"
@@ -83,53 +85,53 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
               console.log('Select change event triggered:', e.target.value)
               handleTypeChange(e.target.value as 'day' | 'night')
             }}
-            className="w-full px-4 py-3 text-lg font-semibold text-gray-900 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            className="w-full px-3 py-3 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           >
-            <option value="day">Day Shift (07:30 - 19:30)</option>
-            <option value="night">Night Shift (19:30 - 07:30)</option>
+            <option value="day">☀️ Day Shift (07:30 - 19:30)</option>
+            <option value="night">🌙 Night Shift (19:30 - 07:30)</option>
           </select>
         </div>
 
-        <div>
-          <label htmlFor="startTime" className="block text-base font-semibold text-gray-900 mb-2">
-            Start Time: {startTime || 'Not set'}
-          </label>
-          <input
-            type="text"
-            id="startTime"
-            value={startTime}
-            onChange={(e) => {
-              console.log('Start time changed to:', e.target.value)
-              setStartTime(e.target.value)
-            }}
-            placeholder="HH:MM (e.g., 07:30)"
-            pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
-            maxLength={5}
-            required
-            className="w-full px-4 py-3 text-2xl font-bold text-gray-900 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white font-mono text-center"
-            style={{ color: '#111827 !important' }}
-          />
-        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-2">
+              Start Time
+            </label>
+            <input
+              type="text"
+              id="startTime"
+              value={startTime}
+              onChange={(e) => {
+                console.log('Start time changed to:', e.target.value)
+                setStartTime(e.target.value)
+              }}
+              placeholder="HH:MM (e.g., 07:30)"
+              pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+              maxLength={5}
+              required
+              className="w-full px-3 py-3 text-lg font-mono text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center"
+            />
+          </div>
 
-        <div>
-          <label htmlFor="endTime" className="block text-base font-semibold text-gray-900 mb-2">
-            End Time: {endTime || 'Not set'}
-          </label>
-          <input
-            type="text"
-            id="endTime"
-            value={endTime}
-            onChange={(e) => {
-              console.log('End time changed to:', e.target.value)
-              setEndTime(e.target.value)
-            }}
-            placeholder="HH:MM (e.g., 19:30)"
-            pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
-            maxLength={5}
-            required
-            className="w-full px-4 py-3 text-2xl font-bold text-gray-900 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white font-mono text-center"
-            style={{ color: '#111827 !important' }}
-          />
+          <div>
+            <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-2">
+              End Time
+            </label>
+            <input
+              type="text"
+              id="endTime"
+              value={endTime}
+              onChange={(e) => {
+                console.log('End time changed to:', e.target.value)
+                setEndTime(e.target.value)
+              }}
+              placeholder="HH:MM (e.g., 19:30)"
+              pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+              maxLength={5}
+              required
+              className="w-full px-3 py-3 text-lg font-mono text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center"
+            />
+          </div>
         </div>
 
         <button
