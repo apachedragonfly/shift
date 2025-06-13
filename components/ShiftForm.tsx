@@ -10,6 +10,7 @@ interface ShiftFormProps {
     type: 'day' | 'night'
     start_time: string
     end_time: string
+    is_overtime?: boolean
   }) => void
   loading?: boolean
 }
@@ -23,6 +24,7 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
   const [type, setType] = useState<'day' | 'night'>('day')
   const [startTime, setStartTime] = useState('07:30')
   const [endTime, setEndTime] = useState('19:30')
+  const [isOvertime, setIsOvertime] = useState(false)
 
   // Helper function to generate array of dates from range
   const generateDateRange = (from: Date, to: Date): Date[] => {
@@ -104,6 +106,7 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
           type,
           start_time: startTime,
           end_time: endTime,
+          is_overtime: isOvertime,
         })
       })
       // Clear selected dates after successful submission
@@ -257,7 +260,7 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
             <h3 className="text-lg font-medium text-gray-900">Shift Configuration</h3>
             {getAllSelectedDates().length > 0 && validateTimeFormat(startTime) && validateTimeFormat(endTime) && (
               <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                ✓ Ready to create {getAllSelectedDates().length} shift{getAllSelectedDates().length !== 1 ? 's' : ''}
+                ✓ Ready to create {getAllSelectedDates().length} {isOvertime ? 'overtime ' : ''}shift{getAllSelectedDates().length !== 1 ? 's' : ''}
               </span>
             )}
           </div>
@@ -271,34 +274,69 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
               </div>
             )}
             
-            {/* Shift Type Toggle */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Shift Type
-              </label>
-              <div className="flex bg-gray-100 rounded-lg p-1 w-fit">
-                <button
-                  type="button"
-                  onClick={() => handleTypeChange('day')}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    type === 'day'
-                      ? 'bg-white text-yellow-700 shadow-sm border border-yellow-200'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  ☀️ Day Shift
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleTypeChange('night')}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    type === 'night'
-                      ? 'bg-white text-blue-700 shadow-sm border border-blue-200'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  🌙 Night Shift
-                </button>
+            {/* Shift Type and Overtime Configuration */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Shift Type Toggle */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Shift Type
+                </label>
+                <div className="flex bg-gray-100 rounded-lg p-1 w-fit">
+                  <button
+                    type="button"
+                    onClick={() => handleTypeChange('day')}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      type === 'day'
+                        ? 'bg-white text-yellow-700 shadow-sm border border-yellow-200'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    ☀️ Day Shift
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleTypeChange('night')}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      type === 'night'
+                        ? 'bg-white text-blue-700 shadow-sm border border-blue-200'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    🌙 Night Shift
+                  </button>
+                </div>
+              </div>
+
+              {/* Overtime Toggle */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Overtime Status
+                </label>
+                <div className="flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => setIsOvertime(!isOvertime)}
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
+                      isOvertime 
+                        ? 'bg-orange-500' 
+                        : 'bg-gray-200'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        isOvertime ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                  <span className="ml-3 text-sm">
+                    <span className={`font-medium ${isOvertime ? 'text-orange-700' : 'text-gray-700'}`}>
+                      {isOvertime ? '⚡ Overtime Shift' : 'Regular Shift'}
+                    </span>
+                    <span className="block text-xs text-gray-500">
+                      {isOvertime ? 'Extra pay eligible' : 'Standard rate'}
+                    </span>
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -363,13 +401,20 @@ export default function ShiftForm({ onSubmit, loading = false }: ShiftFormProps)
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
                   <span>Applied to {getAllSelectedDates().length} selected date{getAllSelectedDates().length !== 1 ? 's' : ''}</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    type === 'day' 
-                      ? 'bg-yellow-100 text-yellow-700' 
-                      : 'bg-blue-100 text-blue-700'
-                  }`}>
-                    {type === 'day' ? '☀️ Day' : '🌙 Night'}
-                  </span>
+                  <div className="flex gap-2">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      type === 'day' 
+                        ? 'bg-yellow-100 text-yellow-700' 
+                        : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {type === 'day' ? '☀️ Day' : '🌙 Night'}
+                    </span>
+                    {isOvertime && (
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+                        ⚡ OT
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

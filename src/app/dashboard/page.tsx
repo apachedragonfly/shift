@@ -14,6 +14,7 @@ interface Shift {
   start_time: string
   end_time: string
   created_at: string
+  is_overtime?: boolean
 }
 
 export default function Dashboard() {
@@ -76,6 +77,7 @@ export default function Dashboard() {
     type: 'day' | 'night'
     start_time: string
     end_time: string
+    is_overtime?: boolean
   }) => {
     setSubmitting(true)
     setMessage('')
@@ -104,6 +106,7 @@ export default function Dashboard() {
             type: shiftData.type,
             start_time: shiftData.start_time,
             end_time: shiftData.end_time,
+            is_overtime: shiftData.is_overtime || false,
           }
         ])
 
@@ -240,15 +243,22 @@ export default function Dashboard() {
                             day: 'numeric'
                           })}
                         </span>
-                        <span
-                          className={`inline-flex px-3 py-1 rounded-full text-sm font-medium w-fit ${
-                            shift.type === 'day'
-                              ? 'bg-yellow-200 text-yellow-800'
-                              : 'bg-blue-200 text-blue-800'
-                          }`}
-                        >
-                          {shift.type === 'day' ? '☀️ Day Shift' : '🌙 Night Shift'}
-                        </span>
+                        <div className="flex gap-2">
+                          <span
+                            className={`inline-flex px-3 py-1 rounded-full text-sm font-medium w-fit ${
+                              shift.type === 'day'
+                                ? 'bg-yellow-200 text-yellow-800'
+                                : 'bg-blue-200 text-blue-800'
+                            }`}
+                          >
+                            {shift.type === 'day' ? '☀️ Day Shift' : '🌙 Night Shift'}
+                          </span>
+                          {shift.is_overtime && (
+                            <span className="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-orange-200 text-orange-800 w-fit">
+                              ⚡ Overtime
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="text-gray-700 font-mono text-lg">
                         {shift.start_time} → {shift.end_time}
