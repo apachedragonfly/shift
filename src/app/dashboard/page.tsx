@@ -264,12 +264,17 @@ export default function Dashboard() {
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
                         <span className="font-semibold text-gray-900 text-lg">
-                          {new Date(shift.date).toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
+                          {(() => {
+                            // Parse date string as local date to avoid timezone conversion
+                            const [year, month, day] = shift.date.split('-').map(Number)
+                            const localDate = new Date(year, month - 1, day) // month is 0-indexed
+                            return localDate.toLocaleDateString('en-US', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })
+                          })()}
                         </span>
                         <div className="flex gap-2">
                           <span

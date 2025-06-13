@@ -89,6 +89,14 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
     return timeRegex.test(time)
   }
 
+  // Convert Date to YYYY-MM-DD string in local timezone (avoids UTC conversion issues)
+  const formatDateForDatabase = (date: Date): string => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   const handleSubmit = async (e: React.FormEvent, forceSave = false) => {
     e.preventDefault()
     
@@ -117,7 +125,7 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
 
     // Check for duplicates if function is provided and not forcing save
     if (onCheckDuplicates && !forceSave) {
-      const dateStrings = allSelectedDates.map(date => date.toISOString().split('T')[0])
+      const dateStrings = allSelectedDates.map(date => formatDateForDatabase(date))
       const duplicates = await onCheckDuplicates(dateStrings)
       
       if (duplicates.length > 0) {
@@ -130,12 +138,12 @@ export default function ShiftForm({ onSubmit, loading = false, onSubmitSuccess, 
     // Submit each date as a separate shift
     if (onSubmit) {
       const datesToSubmit = forceSave 
-        ? getAllSelectedDates().filter(date => !duplicateDates.includes(date.toISOString().split('T')[0]))
+        ? getAllSelectedDates().filter(date => !duplicateDates.includes(formatDateForDatabase(date)))
         : getAllSelectedDates()
         
       datesToSubmit.forEach(date => {
         onSubmit({
-          date: date.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD string
+          date: formatDateForDatabase(date), // Convert Date to YYYY-MM-DD string in local timezone
           type,
           start_time: startTime,
           end_time: endTime,
