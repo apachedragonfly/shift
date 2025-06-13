@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import AuthGuard from '../../../components/AuthGuard'
+import ShiftForm from '../../../components/ShiftForm'
 import { supabase } from '../../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
@@ -43,11 +44,15 @@ export default function Dashboard() {
               {loading ? 'Logging out...' : 'LOGOUT'}
             </button>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
             <p className="text-gray-600">
               Welcome to SHIFT! You have successfully logged in.
             </p>
           </div>
+
+          <ShiftForm onSubmit={(shiftData) => {
+            console.log('Shift data:', shiftData)
+          }} />
         </div>
       </div>
     </AuthGuard>
