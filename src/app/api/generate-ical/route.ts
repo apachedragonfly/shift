@@ -45,6 +45,8 @@ function convertShiftToEvent(shift: Shift) {
     end: [endYear, endMonth, endDay, endHour, endMinute] as [number, number, number, number, number],
     startInputType: 'local' as const,
     endInputType: 'local' as const,
+    startOutputType: 'local' as const,
+    endOutputType: 'local' as const,
     title: `${type === 'day' ? 'Day' : type === '8hour' ? '8-Hour' : 'Night'} Shift`,
     description: `Generated from SHIFT Organizer`,
     location: 'Work',
@@ -121,8 +123,11 @@ export async function GET(request: NextRequest) {
     // Convert each shift to ICS event format
     const events = shifts.map(shift => convertShiftToEvent(shift))
 
-    // Generate ICS content
-    const { error: icsError, value: icsContent } = createEvents(events)
+    // Generate ICS content with floating time (no timezone conversion)
+    const { error: icsError, value: icsContent } = createEvents(events, {
+      productId: 'SHIFT Organizer',
+      calName: 'Work Shifts'
+    })
 
     if (icsError) {
       console.error('Error creating ICS content:', icsError)
