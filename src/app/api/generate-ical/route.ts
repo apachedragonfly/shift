@@ -17,15 +17,15 @@ interface Shift {
 function convertShiftToEvent(shift: Shift) {
   const { date, type, start_time, end_time, id } = shift
   
-  // Parse date components to avoid timezone issues
+  // Parse date components directly to avoid timezone issues
   const [year, month, day] = date.split('-').map(Number)
   const [startHour, startMinute] = start_time.split(':').map(Number)
   const [endHour, endMinute] = end_time.split(':').map(Number)
   
   // Create start date components
-  let startYear = year
-  let startMonth = month
-  let startDay = day
+  const startYear = year
+  const startMonth = month
+  const startDay = day
   
   // Create end date components
   let endYear = year
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Convert each shift to ICS event format
-    const events = shifts.map(convertShiftToEvent)
+    const events = shifts.map(shift => convertShiftToEvent(shift))
 
     // Generate ICS content
     const { error: icsError, value: icsContent } = createEvents(events)
