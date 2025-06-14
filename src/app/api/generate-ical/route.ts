@@ -17,39 +17,34 @@ interface Shift {
 function convertShiftToEvent(shift: Shift) {
   const { date, type, start_time, end_time, id } = shift
   
-  // Parse date and times
-  const shiftDate = new Date(date)
+  // Parse date components to avoid timezone issues
+  const [year, month, day] = date.split('-').map(Number)
   const [startHour, startMinute] = start_time.split(':').map(Number)
   const [endHour, endMinute] = end_time.split(':').map(Number)
   
-  // Create start datetime
-  const startDateTime = new Date(shiftDate)
-  startDateTime.setHours(startHour, startMinute, 0, 0)
+  // Create start date components
+  let startYear = year
+  let startMonth = month
+  let startDay = day
   
-  // Create end datetime
-  const endDateTime = new Date(shiftDate)
-  endDateTime.setHours(endHour, endMinute, 0, 0)
+  // Create end date components
+  let endYear = year
+  let endMonth = month
+  let endDay = day
   
   // Handle night shift that goes to next day
   if (type === 'night' && endHour < startHour) {
-    endDateTime.setDate(endDateTime.getDate() + 1)
+    const nextDay = new Date(year, month - 1, day + 1)
+    endYear = nextDay.getFullYear()
+    endMonth = nextDay.getMonth() + 1
+    endDay = nextDay.getDate()
   }
   
   return {
-    start: [
-      startDateTime.getFullYear(),
-      startDateTime.getMonth() + 1, // Month is 0-indexed
-      startDateTime.getDate(),
-      startDateTime.getHours(),
-      startDateTime.getMinutes()
-    ] as [number, number, number, number, number],
-    end: [
-      endDateTime.getFullYear(),
-      endDateTime.getMonth() + 1,
-      endDateTime.getDate(),
-      endDateTime.getHours(),
-      endDateTime.getMinutes()
-    ] as [number, number, number, number, number],
+    start: [startYear, startMonth, startDay, startHour, startMinute] as [number, number, number, number, number],
+    end: [endYear, endMonth, endDay, endHour, endMinute] as [number, number, number, number, number],
+    startInputType: 'local' as const,
+    endInputType: 'local' as const,
     title: `${type === 'day' ? 'Day' : type === '8hour' ? '8-Hour' : 'Night'} Shift`,
     description: `Generated from SHIFT Organizer`,
     location: 'Work',
