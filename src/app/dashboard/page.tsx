@@ -189,10 +189,12 @@ export default function Dashboard() {
   }
 
   // Filter shifts by selected month
-  const filteredShifts = shifts.filter(shift => {
-    const shiftMonth = shift.date.substring(0, 7) // Extract YYYY-MM from YYYY-MM-DD
-    return shiftMonth === selectedMonth
-  })
+  const filteredShifts = selectedMonth === 'all'
+    ? shifts
+    : shifts.filter(shift => {
+      const shiftMonth = shift.date.substring(0, 7) // Extract YYYY-MM from YYYY-MM-DD
+      return shiftMonth === selectedMonth
+    })
 
   // Generate month options for the dropdown (last 12 months + next 12 months)
   const generateMonthOptions = () => {
@@ -285,6 +287,7 @@ export default function Dashboard() {
                       onChange={(e) => setSelectedMonth(e.target.value)}
                       className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-[160px] touch-manipulation"
                     >
+                      <option value="all">Show all dates</option>
                       {generateMonthOptions().map(option => (
                         <option key={option.value} value={option.value}>
                           {option.label}
@@ -317,7 +320,7 @@ export default function Dashboard() {
             ) : (
               <>
                 <div className="mb-4 text-sm text-gray-600">
-                  Showing {filteredShifts.length} shift{filteredShifts.length !== 1 ? 's' : ''} for {generateMonthOptions().find(opt => opt.value === selectedMonth)?.label}
+                  Showing {filteredShifts.length} shift{filteredShifts.length !== 1 ? 's' : ''} {selectedMonth === 'all' ? '(all dates)' : `for ${generateMonthOptions().find(opt => opt.value === selectedMonth)?.label}`}
                   {shifts.length !== filteredShifts.length && (
                     <span className="ml-2 text-gray-500">
                       ({shifts.length} total)
