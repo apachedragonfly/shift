@@ -25,18 +25,31 @@ export default function CalendarExportButton() {
       // Call the API endpoint with auth token
       const response = await fetch('/api/generate-ical', {
         method: 'GET',
+        // Avoid setting Content-Type on GET to prevent unnecessary preflight and mismatched expectations
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
         },
+        cache: 'no-store',
       })
 
       console.log('Export: API status', response.status)
 
       if (!response.ok) {
-        const errorData = await response.json()
-        console.log('Export: API error -', errorData.error)
-        setMessage(errorData.error || 'Failed to generate calendar file')
+        let errorMessage = 'Failed to generate calendar file'
+        try {
+          const contentType = response.headers.get('content-type') || ''
+          if (contentType.includes('application/json')) {
+            const errorData = await response.json()
+            errorMessage = errorData.error || errorMessage
+          } else {
+            const text = await response.text()
+            if (text) errorMessage = text
+          }
+        } catch {
+          // Fallback to status text if parsing fails
+          errorMessage = response.statusText || errorMessage
+        }
+        setMessage(errorMessage)
         return
       }
 
@@ -69,7 +82,8 @@ export default function CalendarExportButton() {
 
     } catch (error) {
       console.error('Error exporting calendar:', error)
-      setMessage('An unexpected error occurred while exporting calendar')
+      const fallback = error instanceof Error ? error.message : 'Unknown error'
+      setMessage(`Failed to reach server: ${fallback}`)
     } finally {
       setLoading(false)
     }
